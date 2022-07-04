@@ -1,6 +1,7 @@
 package db
 
 import (
+	"database/sql"
 	"testing"
 	"time"
 
@@ -42,4 +43,30 @@ func TestGetAccount(t *testing.T) {
 	require.Equal(t, account.Balance, account2.Balance)
 	require.Equal(t, account.CryptoMoney, account2.CryptoMoney)
 	require.WithinDuration(t, account.CreatedAt, account2.CreatedAt, time.Second)
+}
+
+func TestUpdateAccount(t *testing.T) {
+	account := createRandomAccount(t)
+	account.Balance = util.RandomBalance()
+	account2, err := testEntities.UpdateAccount(account)
+	require.NoError(t, err)
+	require.NotEmpty(t, account2)
+
+	require.Equal(t, account.Id, account2.Id)
+	require.Equal(t, account.Owner, account2.Owner)
+	require.Equal(t, account.Balance, account2.Balance)
+	require.Equal(t, account.CryptoMoney, account2.CryptoMoney)
+	require.WithinDuration(t, account.CreatedAt, account2.CreatedAt, time.Second)
+}
+
+func TestDeleteAccount(t *testing.T) {
+	account := createRandomAccount(t)
+
+	err := testEntities.DeleteAccount(account.Id)
+	require.NoError(t, err)
+
+	account2, err := testEntities.GetAccount(account.Id)
+	require.Error(t, err)
+	require.EqualError(t, err, sql.ErrNoRows.Error())
+	require.Empty(t, account2)
 }

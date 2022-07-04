@@ -15,7 +15,7 @@ func (a *AccountDB) GetAccount(id int64) (entities.Account, error) {
 	var ea entities.Account
 	err := a.Get(&ea, `SELECT * FROM accounts WHERE id = $1`, id)
 	if err != nil {
-		return entities.Account{}, fmt.Errorf("error getting account: %w", err)
+		return entities.Account{}, err
 	}
 	return ea, nil
 }
@@ -38,15 +38,16 @@ func (a *AccountDB) CreateAccount(input entities.Account) (entities.Account, err
 	return ea, nil
 }
 
-func (a *AccountDB) UpdateAccount(ea *entities.Account) error {
-	err := a.Get(&ea, `UPDATE INTO accounts SET balance = $1 WHERE id=$2 RETURNING *`, ea.Balance, ea.Id)
+func (a *AccountDB) UpdateAccount(input entities.Account) (entities.Account, error) {
+	var ea entities.Account
+	err := a.Get(&ea, `UPDATE accounts SET balance = $1 WHERE id=$2 RETURNING id, owner, balance, crypto_money, created_at`, input.Balance, input.Id)
 	if err != nil {
-		return fmt.Errorf("error updating account: %w", err)
+		return entities.Account{}, fmt.Errorf("error updating account: %w", err)
 	}
-	return nil
+	return ea, nil
 }
 
-func (a *AccountDB) DeleteAccount(id int) error {
+func (a *AccountDB) DeleteAccount(id int64) error {
 	_, err := a.Exec(`DELETE FROM accounts WHERE id = $1`, id)
 	if err != nil {
 		return fmt.Errorf("error deleting account: %w", err)
