@@ -15,7 +15,7 @@ func main() {
 		log.Fatal(err)
 	}
 
-	accounts, err := entities.GetListAccounts()
+	accounts, err := entities.ListAccounts(5, 0)
 
 	if err != nil {
 		log.Fatal(err)

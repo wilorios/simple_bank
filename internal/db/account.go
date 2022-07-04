@@ -20,9 +20,9 @@ func (a *AccountDB) GetAccount(id int64) (entities.Account, error) {
 	return ea, nil
 }
 
-func (a *AccountDB) GetListAccounts() ([]entities.Account, error) {
+func (a *AccountDB) ListAccounts(limit int, offset int) ([]entities.Account, error) {
 	var ea []entities.Account
-	err := a.Select(&ea, `SELECT * FROM accounts`)
+	err := a.Select(&ea, `SELECT id, owner, balance, crypto_money, created_at FROM accounts ORDER BY id LIMIT $1 OFFSET $2`, limit, offset)
 	if err != nil {
 		return []entities.Account{}, fmt.Errorf("error getting accounts: %w", err)
 	}
