@@ -29,16 +29,17 @@ func (a *AccountDB) GetListAccounts() ([]entities.Account, error) {
 	return ea, nil
 }
 
-func (a *AccountDB) CreateAccount(ea *entities.Account) error {
-	err := a.Get(a, `INSERT INTO accounts VALUES ($1, $2, $3, $4) RETURNING *`, ea.Id, ea.Owner, ea.Balance, ea.CryptoMoney)
+func (a *AccountDB) CreateAccount(input *entities.Account) (entities.Account, error) {
+	var ea entities.Account
+	err := a.Get(&ea, `INSERT INTO accounts (owner, balance, crypto_money) VALUES ($1, $2, $3) RETURNING id, owner, balance, crypto_money, created_at`, input.Owner, input.Balance, input.CryptoMoney)
 	if err != nil {
-		return fmt.Errorf("error inserting account: %w", err)
+		return entities.Account{}, fmt.Errorf("error inserting account: %w", err)
 	}
-	return nil
+	return ea, nil
 }
 
 func (a *AccountDB) UpdateAccount(ea *entities.Account) error {
-	err := a.Get(a, `UPDATE INTO accounts SET balance = $1 WHERE id=$2 RETURNING *`, ea.Balance, ea.Id)
+	err := a.Get(&ea, `UPDATE INTO accounts SET balance = $1 WHERE id=$2 RETURNING *`, ea.Balance, ea.Id)
 	if err != nil {
 		return fmt.Errorf("error updating account: %w", err)
 	}
