@@ -11,7 +11,7 @@ type AccountDB struct {
 	*sqlx.DB
 }
 
-func (a *AccountDB) GetAccount(id int) (entities.Account, error) {
+func (a *AccountDB) GetAccount(id int64) (entities.Account, error) {
 	var ea entities.Account
 	err := a.Get(&ea, `SELECT * FROM accounts WHERE id = $1`, id)
 	if err != nil {
@@ -29,7 +29,7 @@ func (a *AccountDB) GetListAccounts() ([]entities.Account, error) {
 	return ea, nil
 }
 
-func (a *AccountDB) CreateAccount(input *entities.Account) (entities.Account, error) {
+func (a *AccountDB) CreateAccount(input entities.Account) (entities.Account, error) {
 	var ea entities.Account
 	err := a.Get(&ea, `INSERT INTO accounts (owner, balance, crypto_money) VALUES ($1, $2, $3) RETURNING id, owner, balance, crypto_money, created_at`, input.Owner, input.Balance, input.CryptoMoney)
 	if err != nil {
